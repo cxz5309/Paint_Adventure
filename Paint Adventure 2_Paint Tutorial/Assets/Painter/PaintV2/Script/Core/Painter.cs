@@ -583,7 +583,7 @@ public class Painter : MonoBehaviour {
         {
             RenderTexture undoTexture = undoList.Last.Value;
             Graphics.CopyTexture(undoTexture, gameObject.GetComponent<RawImage>().texture);
-            redoList.AddLast(undoTexture);
+            //redoList.AddLast(undoTexture);
             undoList.RemoveLast();
             Debug.Log("Add redoList, Remove undoList");
         }

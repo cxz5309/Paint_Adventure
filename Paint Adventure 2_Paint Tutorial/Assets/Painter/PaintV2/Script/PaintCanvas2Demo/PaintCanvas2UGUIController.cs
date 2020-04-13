@@ -66,9 +66,7 @@ public class PaintCanvas2UGUIController : MonoBehaviour {
                 if (painterCanvas.GetComponent<RectTransform>().rect.Contains(pos))
                 {
                     painterCanvas.CopyTexture(true);
-                }
-                if (painterCanvas.GetComponent<RectTransform>().rect.Contains(pos))
-                {
+                     
                     painterCanvas.ClickDraw(pos, null, painterCanvas.penMat.mainTexture, painterCanvas.brushScale,
                        painterCanvas.penMat, painterCanvas.renderTexture, true);
                 }
@@ -90,12 +88,6 @@ public class PaintCanvas2UGUIController : MonoBehaviour {
 		}
 		else if(Input.GetMouseButtonUp(0) && _isMouseDown)
 		{
-            Vector2 pos;
-
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(painterCanvas.transform as RectTransform, Input.mousePosition, null, out pos))
-            {
-                
-            }
             painterCanvas.EndDraw();
 			_isMouseDown = false;
 		}
