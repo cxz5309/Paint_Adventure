@@ -132,9 +132,13 @@ public class Painter : MonoBehaviour {
     
     [Header("Undo")]
     private LinkedList<RenderTexture> undoList = new LinkedList<RenderTexture>();
-    private RenderTexture tmpTexture;
+    private RenderTexture[] undoTexture = new RenderTexture[6];
+    private int undoTextureIdx = 0;
     [Header("Redo")]
     private LinkedList<RenderTexture> redoList = new LinkedList<RenderTexture>();
+    private RenderTexture[] redoTexture = new RenderTexture[6];
+    private int redoTextureIdx = 0;
+
 
 
     public bool isErase{
@@ -255,7 +259,11 @@ public class Painter : MonoBehaviour {
 				ResetCanvas();
 			}
 
-            tmpTexture = Instantiate(renderTexture);
+            for (int i = 0; i < 6; i++)
+            {
+                undoTexture[i] = Instantiate(renderTexture);
+                redoTexture[i] = Instantiate(renderTexture);
+            }
         }
     }
 
@@ -509,7 +517,9 @@ public class Painter : MonoBehaviour {
 			Color c = new Color(0,0,0,0) ;
 			GL.Clear(true,true,c);
 			RenderTexture.active = null;
-		}
+            undoList.Clear();
+            redoList.Clear();
+        }
 	}
 
 	/// <summary>
@@ -563,49 +573,66 @@ public class Painter : MonoBehaviour {
     {
         if (posIsInRectangle)
         {
-            Graphics.CopyTexture(renderTexture, tmpTexture);
-            undoList.AddLast(tmpTexture);
-            if (undoList.Count > 5)
+            Graphics.CopyTexture(renderTexture, undoTexture[undoTextureIdx]);
+            undoList.AddLast(undoTexture[undoTextureIdx]);
+            undoTextureIdx = (undoTextureIdx + 1) % 6;
+            if(redoList.Count != 0)
             {
-                Debug.Log("ListFull! Clear idx0 Count : " + undoList.Count);
+                redoList.Clear();
+                redoTextureIdx = 0;
+                Debug.Log("redoList 삭제!" + redoList.Count);
+            }
+            if (undoList.Count > 6)
+            {
+                Debug.Log("ListFull! idx0 Clear, Count : " + undoList.Count);
                 undoList.RemoveFirst();
             }
             else
             {
-                Debug.Log("Add undoList Count : " + undoList.Count);
+                Debug.Log("Add undoList, Count : " + undoList.Count);
             }
         }
+        Debug.Log("Texture undo : " + undoTextureIdx + "redo : " + redoTextureIdx);
     }
 
     public void UndoTexture()
     {
         if (undoList.Count != 0)
         {
-            RenderTexture undoTexture = undoList.Last.Value;
-            Graphics.CopyTexture(undoTexture, gameObject.GetComponent<RawImage>().texture);
-            //redoList.AddLast(undoTexture);
+            RenderTexture tmpTexture = undoList.Last.Value;
+            Graphics.CopyTexture(gameObject.GetComponent<RawImage>().texture, redoTexture[redoTextureIdx]);
+            Graphics.CopyTexture(tmpTexture, gameObject.GetComponent<RawImage>().texture);
+            redoList.AddLast(redoTexture[redoTextureIdx]);
             undoList.RemoveLast();
             Debug.Log("Add redoList, Remove undoList");
+            undoTextureIdx = (undoTextureIdx +6 - 1) % 6;
+            redoTextureIdx = (redoTextureIdx + 1) % 6;
         }
         else
         {
-            Debug.Log("undoListEmpty! MaxCount is 5, Count : " + undoList.Count);
+            Debug.Log("undoListEmpty! MaxCount is 6, Count : " + undoList.Count);
         }
+        Debug.Log("Texture undo : " + undoTextureIdx + "redo : " + redoTextureIdx);
     }
+
     public void RedoTexture()
     {
-        if (undoList.Count != 0)
+        if (redoList.Count != 0)
         {
-            RenderTexture redoTexture = redoList.Last.Value;
-            Graphics.CopyTexture(redoTexture, gameObject.GetComponent<RawImage>().texture);
-            undoList.AddLast(redoTexture);
+            RenderTexture tmpTexture = redoList.Last.Value;
+            Graphics.CopyTexture(gameObject.GetComponent<RawImage>().texture, undoTexture[undoTextureIdx]);
+            Graphics.CopyTexture(tmpTexture, gameObject.GetComponent<RawImage>().texture);
+            undoList.AddLast(undoTexture[undoTextureIdx]);
             redoList.RemoveLast();
             Debug.Log("Add undoList, Remove redoList");
+            undoTextureIdx = (undoTextureIdx + 1) % 6;
+            redoTextureIdx = (redoTextureIdx +6 - 1) % 6;
         }
         else
         {
-            Debug.Log("redoListEmpty! It's lastest Count : " + undoList.Count);
+            Debug.Log("redoListEmpty! It's lastest, Count : " + undoList.Count);
         }
+        Debug.Log("Texture undo : " + undoTextureIdx + "redo : " + redoTextureIdx);
     }
 
     /// <summary>
