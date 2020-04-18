@@ -555,12 +555,12 @@ public class Painter : MonoBehaviour {
         Texture2D tex2D = renToTexture2D(renTex);
         byte[] bytes = tex2D.EncodeToPNG();
         Destroy(tex2D);
-        File.WriteAllBytes(Application.streamingAssetsPath + "/a.png", bytes);
+        File.WriteAllBytes(Application.dataPath + "/Resources/a.png", bytes);
     }
 
     Texture2D renToTexture2D(RenderTexture renTex)
     {
-        Texture2D tex2D = new Texture2D((int)this.GetComponent<RectTransform>().rect.width, (int)this.GetComponent<RectTransform>().rect.height, TextureFormat.RGB24, false);
+        Texture2D tex2D = new Texture2D((int)this.GetComponent<RectTransform>().rect.width, (int)this.GetComponent<RectTransform>().rect.height, TextureFormat.ARGB32, false);
         RenderTexture.active = renTex;
         tex2D.ReadPixels(new Rect(0, 0, renTex.width, renTex.height), 0, 0);
         tex2D.Apply();
